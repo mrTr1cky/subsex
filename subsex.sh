@@ -91,6 +91,24 @@ compare_and_save() {
     rm "$subfinder_output" "$findomain_output" "$amass_output" "$crtsh_output"
 }
 
+domain_list_input() {
+    echo "Enter File name :"
+    read domain_file
+
+    if [ ! -f "$domain_file" ]; then
+        echo "File not found. Please enter a valid file path."
+        return 1
+    fi
+
+    while IFS= read -r domain; do
+        echo "Processing domain: $domain"
+        run_subfinder "$domain"
+        run_findomain "$domain"
+        run_amass "$domain"
+        run_crtsh "$domain"
+    done < "$domain_file"
+}
+
 check_dependency "subfinder"
 check_dependency "findomain"
 check_dependency "amass"
@@ -105,9 +123,10 @@ Select the command to run:
 3. Run amass for enumeration.
 4. Fetch SSL certificate information from crt.sh
 5. Run all and compare results.
-6. Exit.
+6. Input a list of domains from a file.
+7. Exit.
 EOF
-    read -p "Enter your choice (1/2/3/4/5/6): " choice
+    read -p "Enter your choice (1/2/3/4/5/6/7): " choice
 
     case $choice in
         1) run_subfinder ;;
@@ -115,8 +134,9 @@ EOF
         3) run_amass ;;
         4) run_crtsh ;;
         5) compare_and_save ;;
-        6) echo "Exiting script."; break ;;
-        *) echo "Invalid choice. Please enter a number from 1 to 6." ;;
+        6) domain_list_input ;;
+        7) echo "Exiting script."; break ;;
+        *) echo "Invalid choice. Please enter a number from 1 to 7." ;;
     esac
 
     echo ""
